@@ -13,10 +13,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: set directory
-      run: cd src
+ 
     - name: make Hp21
-      run: make MODEL=21
+      run: cd ./src
+           make MODEL=21
     - name: make Hp22
       run: make MODEL=22
     - name: make Hp25
