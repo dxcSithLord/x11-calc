@@ -2,9 +2,9 @@
 
 ![HP21](./img/x11-calc-21.png) ![HP22](./img/x11-calc-22.png) ![HP25](./img/x11-calc-25.png) 
 
-![HP27](./img/x11-calc-27.png) ![HP29](./img/x11-calc-29.png) ![HP31](./img/x11-calc-31.png)
+![HP27](./img/x11-calc-27.png) ![HP29](./img/x11-calc-29.png)
 
-![HP32](./img/x11-calc-32.png) ![HP33](./img/x11-calc-33.png)
+![HP31](./img/x11-calc-31.png) ![HP32](./img/x11-calc-32.png) ![HP33](./img/x11-calc-33.png)
 
 Written in C using X11.
 
@@ -45,10 +45,22 @@ examples in the owners handbook..
 
 ### Compiling
 
-To build a the simulator for a particular model on Linux or Tru64 UNIX edit
-the make file and change the value of the MODEL number, then do 'make all'.
+To  build the simulator on Linux check that you have all the  prerequisites
+installed  then  download the source code from github and unzip it  (a  new
+folder will be created to hold it automatically).  Then change directory to
+the folder containing the source code and run 'make MODEL=nn', where nn  is
+a valid model number.
 
-On VMS use '@make.com'.
+e.g:
+
+    $ wget https://github.com/mike632t/x11-calc/archive/refs/heads/master.zip
+    $ unzip master.zip
+    $ cd x11-calc-master/src
+    $ make MODEL=25
+    
+    $ ../bin/x11-calc-25
+    x11-calc-25: Version 0.2 [Commit ID: d3e8e4b] 14 Oct 21 00:15:42 (Build: 0058)
+    ROM Size : 2048 words 
 
 ### Keyboard Shortcuts
 
@@ -86,6 +98,23 @@ less than 24 -bit colour - may get round to this be one day...
 
 The  X11 implementation on the Raspberry Pi 4 is just too slow to draw  the
 display without it flickering (but it works well on the Jetson Nano, and an
-old P4 with Intel graphics).  I suspect that rewriting the display code  to
+old Intel Atom based netbook). I suspect that rewriting the display code to
 use  a custom font or a fixed size bitmap for each digit instead of drawing
 each segment individually might speed things up. 
+
+### Prerequisites
+
+The following packages are required to build and/or run the simulator.
+
+- Debian : gcc, make, libx11-dev, libc6-dev, xfonts-base
+
+- Ubuntu : gcc, make, libx11-dev, libc6-dev, xfonts-base
+
+- Fedora : gcc, make, libx11-dev, libc6-dev, xorg-x11-xfonts-base
+
+- Gentoo : gcc, make, libx11-dev, libc6-dev, font-misc-misc
+
+- Arch   : gcc, make, libx11-dev, libc6-dev, xorg-fonts-misc ?
+
+- Alpine : gcc, make, libx11-dev, libc6-dev, font-misc-misc ?
+

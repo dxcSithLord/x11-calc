@@ -62,8 +62,8 @@
 #include <X11/Xlib.h>  /* XOpenDisplay(), etc. */
 #include <X11/Xutil.h> /* XSizeHints etc. */
 
-#include "x11-calc-button.h"
 #include "x11-calc-switch.h"
+#include "x11-calc-button.h"
 
 #include "x11-calc.h"
 

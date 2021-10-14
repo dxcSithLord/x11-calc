@@ -39,9 +39,9 @@
 #include <X11/Xutil.h> /* XSizeHints etc. */
 
 #include "x11-calc-font.h"
-#include "x11-calc-button.h"
-#include "x11-calc-switch.h"
 #include "x11-calc-label.h"
+#include "x11-calc-switch.h"
+#include "x11-calc-button.h"
 
 #include "x11-calc.h"
 

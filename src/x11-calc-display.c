@@ -66,8 +66,8 @@
 
 #include "x11-calc-colour.h"
 #include "x11-calc-segment.h"
-#include "x11-calc-cpu.h"
 #include "x11-calc-display.h"
+#include "x11-calc-cpu.h"
 
 #include "gcc-debug.h"
 
@@ -99,8 +99,8 @@ odisplay *h_display_create(int i_index, int i_left, int i_top, int i_width,
    h_display->width = i_width;
    h_display->height = i_height;
    for (i_count = 0; i_count < DIGITS; i_count++) {
-      /*h_display->segment[i_count] = h_segment_create(0, 0,  7 + 17 * i_count, 21, 17, 29, i_foreground, i_background); /* Spice  - 11 Dight display */
-      h_display->segment[i_count] = h_segment_create(0, 0,  5 + 16 * i_count, 21, 14, 29, i_foreground, i_background); /* Woodstock - 12 Dight display */
+      /*h_display->segment[i_count] = h_segment_create(0, 0,  7 + 17 * i_count, 21, 17, 29, i_foreground, i_background); /* Spice  - 11 Digit display */
+      h_display->segment[i_count] = h_segment_create(0, 0,  5 + 16 * i_count, 21, 14, 29, i_foreground, i_background); /* Woodstock - 12 Digit display */
       h_display->segment[i_count]->mask = DISPLAY_SPACE;
    }
    h_display->foreground = i_foreground;
