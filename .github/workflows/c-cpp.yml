@@ -1,10 +1,20 @@
 name: C/C++ CI
 
+defaults:
+  run:
+    shell: bash
+    working-directory: src
+
 on:
   push:
     branches: [ master ]
+    paths:
+      - 'src/**'
+
   pull_request:
     branches: [ master ]
+    paths:
+      - 'src/**'
 
 jobs:
   build:
@@ -13,10 +23,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
- 
+    
     - name: make Hp21
-      run: cd ./src
-           make MODEL=21
+      run:  make MODEL=21
     - name: make Hp22
       run: make MODEL=22
     - name: make Hp25
