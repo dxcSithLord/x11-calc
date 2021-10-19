@@ -107,7 +107,7 @@
  *                     command line - MT
  * 14 Sep 21         - Eliminated  the delay between ticks when the display
  *                     is blank - MT
- *             0.2   - It works !!
+ *             0.2   - HP21 simulator works !!
  * 15 Sep 21         - The  escape key now resets the simulator instead  of
  *                     exiting - MT
  * 16 Sep 21         - Improved the display flicker problem by updating the
@@ -124,6 +124,7 @@
  *  2 Oct 21         - Changed property names - MT
  *  4 Oct 21         - Added the ability to display the CPU registers using
  *                     Ctrl-R when in trace mode - MT
+ *  7 Oct 21   0.3   - HP25 simulator now working..
  * 10 Oct 21         - Allows  switches and buttons to be undefined if  not
  *                     used - MT
  * 11 Oct 21         - Most  text  messages are now defined in the  header,
@@ -136,6 +137,14 @@
  *                     code to work on VMS using a black and white  display
  *                     without being modified) - MT
  * 12 Oct 21         - Added routine to display warnings - MT
+ * 14 Oct 21         - Added support for continuous memory - MT 
+ * 16 Oct 21   0.4   - HP29 simulator works..!
+ *                   - Undefined  switches should be off.  Rather strangely
+ *                     the HP27 tests S3 even though it doesn't have a mode
+ *                     select switch - go figure - MT
+ *             0.5   - HP27 simulator works (requires testing).
+ *             0.6   - HP31 and HP32 simulators work (requires testing).
+
  *
  * To Do             - Allow the the display and processor properties to be
  *                     model  specific, or use a separate calculator  class
@@ -154,9 +163,9 @@
  */
 
 #define NAME           "x11-calc"
-#define VERSION        "0.2"
-#define BUILD          "0058"
-#define DATE           "04 Oct 21"
+#define VERSION        "0.6"
+#define BUILD          "0071"
+#define DATE           "16 Oct 21"
 #define AUTHOR         "MT"
 
 #define DEBUG 0        /* Enable/disable debug*/
@@ -440,7 +449,7 @@ int main(int argc, char *argv[]){
    b_abort = False;
    i_count = 0;
 
-   if (h_switch[1] != NULL) h_processor->select = h_switch[1]->state; else h_processor->select = True; /* Allow switches to be undefined if not used */
+   if (h_switch[1] != NULL) h_processor->select = h_switch[1]->state; else h_processor->select = False; /* Allow switches to be undefined if not used */
 
    while (!b_abort) {
       i_count--;
@@ -483,7 +492,7 @@ int main(int argc, char *argv[]){
             else if (h_keyboard->key == (XK_R & 0x1f)) /* Ctrl-R to display internal CPU registers */
                v_fprint_state(stdout, h_processor);
             else if (h_keyboard->key == (XK_C & 0x1f)) { /* Ctrl-C to reset  */
-               v_processor_init(h_processor); b_run = True;
+               v_processor_reset(h_processor); b_run = True;
             }
             else { /* Check for matching button */
                int i_count;
@@ -531,10 +540,13 @@ int main(int argc, char *argv[]){
                   if (!(h_switch_pressed(h_switch[0], x_event.xbutton.x, x_event.xbutton.y) == NULL)) {
                      h_switch[0]->state = !(h_switch[0]->state); /* Toggle switch */
                      i_switch_draw(x_display, x_application_window, i_screen, h_switch[0]);
-                     if (h_switch[0]->state)
-                        v_processor_init(h_processor); /* Reset the processor */
-                     else
+                     if (h_switch[0]->state) {
+                        v_processor_reset(h_processor); /* Reset the processor */
+                     }
+                     else {
+                        v_processor_save(h_processor);
                         h_processor->enabled = False; /* Disable the processor */
+                     }
                   }
                   if (!(h_switch_pressed(h_switch[1], x_event.xbutton.x, x_event.xbutton.y) == NULL)) {
                      h_switch[1]->state = !(h_switch[1]->state); /* Toggle switch */
@@ -572,8 +584,9 @@ int main(int argc, char *argv[]){
       }
    }
 
-   /* Close connection to server. */
-   XDestroyWindow(x_display, x_application_window);
+
+   v_processor_save(h_processor); /* Save state */
+   XDestroyWindow(x_display, x_application_window); /* Close connection to server */
    XCloseDisplay(x_display);
    exit(0);
 }

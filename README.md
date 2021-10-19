@@ -14,53 +14,59 @@ it will only compile without modification on Linux (Debian 10), but as with
 earlier  versions of the intention is to be able to compile the code on VMS
 running on either VAX or Alpha processors, and Tru64 Unix running on Alpha.
 
+### Latest News
+
+Added continuous memory to models that support it.  The contents of program
+and  data registers are saved in a hidden file in the users' HOME directory
+when the program exits or the calculator is switched off, and restored when
+the application is loaded or is reset using 'Ctrl-C'.
+
 ### Status
 
 Currently very much work in progress. The CPU simulation code is now mostly
-complete but several important functions remain to be implemented and it is
-likely that the memory data structures will have to be revised.
+complete but several important features required by later calculator models
+have not yet be implemented.
 
-##### HP21 - Working 
+##### HP 21 - Working 
 
 ##### HP 22 - Working
 The  following issues were observed when checking the behaviour against the
 examples in the owners handbook..
 * The examples on pages 65, 66 and 76 only work if END is selected.
 
-##### HP 25 - Working
-* Not continuous memory.
+##### HP 25 - Working (now with continuous memory)
 
-##### HP 27 - Only keyboard working.
+##### HP 27 - Completed (not finished testing)
 
-##### HP 29 - Only keyboard working.
+##### HP 29 - Working
 
-##### HP 31 - Work in progress.
-* Add support for missing opcodes.
-* Implement on/off switch.
-* Fix display.
+##### HP 31 - Completed (not tested)
+* Fails self test
 
-##### HP 32 - Only keyboard working.
+##### HP 32 - Completed (not tested)
+* Fails self test
 
-##### HP 33 - Only keyboard working.
+##### HP 33 - Mostly working
+* Self test does not run (terminates simulation).
+* Some minor issues with the display decoder still to fix
 
 ### Compiling
 
 To  build the simulator on Linux check that you have all the  prerequisites
 installed  then  download the source code from github and unzip it  (a  new
-folder will be created to hold it automatically).  Then change directory to
-the folder containing the source code and run 'make MODEL=nn', where nn  is
-a valid model number.
+folder  will  be created to automatically).  Then change directory  to  the
+new folder run 'make all' to build all the available simulators.
 
 e.g:
 
     $ wget https://github.com/mike632t/x11-calc/archive/refs/heads/master.zip
     $ unzip master.zip
-    $ cd x11-calc-master/src
-    $ make MODEL=25
+    $ cd x11-calc-master
+    $ make all
     
-    $ ../bin/x11-calc-25
-    x11-calc-25: Version 0.2 [Commit ID: d3e8e4b] 14 Oct 21 00:15:42 (Build: 0058)
-    ROM Size : 2048 words 
+    $ ./bin/x11-calc-29
+    x11-calc-29: Version 0.4 [Commit ID: 81c55be] 16 Oct 21 21:15:00 (Build: 0067)
+    ROM Size : 4096 words 
 
 ### Keyboard Shortcuts
 
@@ -74,7 +80,9 @@ corresponds to 'SST'.
 
 'f' and where applicable 'g' and 'h' correspond to the function keys.
 
-'Ctrl-Z' Quits, and 'Ctrl-C' does a reset.
+'Ctrl-Z'  Quits,  and  'Ctrl-C' does a reset.  For models  with  continuous
+memory 'Ctrl-Z' saves the current register contents, and 'Ctrl-C'  restores
+them to the original saved state.
 
 ### Debugging
 
@@ -88,10 +96,6 @@ of the CPU registers .
 When in trace mode a jump to the same instruction produces no output.
 
 ### Known Issues
-
-Attempting to compile using a later version of 'gcc' will result in several
-warning  messages being generated due to the the use of 'ftime()' which has
-been deprecated.
 
 Need  to sort out colour mapping to allow program to run on a display  with
 less than 24 -bit colour - may get round to this be one day...

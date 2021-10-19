@@ -22,6 +22,8 @@
  * 30 Aug 20         - Moved functions to separate source file - MT
  * 12 Oct 21         - Removed Title and replaced with model number - MT
  *                   - Added macro definition for continuous memory - MT
+ * 17 Oct 21         - Added additional registers that are used for working
+ *                     storage - MT
  *                      
  */
 
@@ -32,8 +34,8 @@
 
 #define DIGITS       11
 
-#define ROM_SIZE     02000  
-#define MEMORY_SIZE  16
+#define ROM_SIZE     07000
+#define MEMORY_SIZE  20
 #define ROM_BANKS    1
 #define CONTINIOUS   False
 
