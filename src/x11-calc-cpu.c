@@ -176,7 +176,12 @@
  *                   - Modified  'p = p + 1' as woodstock and spice  series
  *                     machines behave differently - MT
  *             0.6   - HP31 and HP32 simulators work (requires testing).
- *                   - Added dummy 'rom checksum' instruction - MT 
+ *                   - Added dummy 'rom checksum' instruction - MT
+ * 20 Oct 21         - Modified 'rom checksum' to set status bit and return
+ *                     and ignores invalid memory addresses (prints warning
+ *                     message) - MT
+ * 26 Oct 21   0.7   - Added processor_load() to load saved registers  from
+ *                     a file - MT
  *
  * To Do             - Don't restore or save ALL registers...
  *
@@ -188,7 +193,7 @@
 #define DATE           "16 Oct 21"
 #define AUTHOR         "MT"
 
-#define DEBUG 0        /* Enable/disable debug*/
+#define DEBUG 1        /* Enable/disable debug*/
 
 #include <string.h>
 #include <stdlib.h>
@@ -391,7 +396,7 @@ static void v_reg_shr(oprocessor *h_processor, oregister *h_register){
          h_register->nibble[i_count] = h_register->nibble[i_count + 1];
 }
 
-/* Logical shift left a register */
+ /* Logical shift left a register */
 static void v_reg_shl(oprocessor *h_processor, oregister *h_register){
    int i_count;
    for (i_count = h_processor->last; i_count >= h_processor->first; i_count--)
@@ -402,23 +407,13 @@ static void v_reg_shl(oprocessor *h_processor, oregister *h_register){
    h_processor->flags[PREV_CARRY] = h_processor->flags[CARRY] = False;
 }
 
-/* Restore saved processor state */
-void v_processor_restore(oprocessor *h_processor) {
+/* Load saved processor state */
+void v_processor_load(oprocessor *h_processor, char *s_pathname) {
    FILE *h_datafile;
-   char *s_dir = getenv("HOME");
-   char s_filename[] = FILENAME;
-   char s_filetype[] = ".dat";
-   char *s_pathname;
    int i_count, i_counter;
 
-   if ((h_processor != NULL) && CONTINIOUS) { /* Check processor defined */
-      if (s_dir == NULL) s_dir = ""; /* Use current folder if HOME not defined */
-      s_pathname = malloc((strlen(s_dir) + strlen(s_filename) +
-         strlen(s_filetype) + 2) * sizeof(char*));
-      strcpy(s_pathname, s_dir);
-      strcat(s_pathname, "/.");
-      strcat(s_pathname, s_filename);
-      strcat(s_pathname, s_filetype);
+   if ((h_processor != NULL) && (s_pathname != NULL)  /* Check processor and pathname are defined */ 
+      && CONTINIOUS) { /* and continuous memory is enabled */
       h_datafile = fopen(s_pathname, "r");
       if (h_datafile !=NULL) { /* If file exists and can be opened restore state */
          debug(fprintf(stderr,"Loading %s \n", s_pathname));
@@ -467,10 +462,28 @@ void v_processor_save(oprocessor *h_processor) {
    }
 }
 
+/* Restore saved processor state */
+void v_processor_restore(oprocessor *h_processor) {
+   char *s_dir = getenv("HOME");
+   char s_filename[] = FILENAME;
+   char s_filetype[] = ".dat";
+   char *s_pathname;
+
+   if ((h_processor != NULL) && CONTINIOUS) { /* Check processor defined */
+      if (s_dir == NULL) s_dir = ""; /* Use current folder if HOME not defined */
+      s_pathname = malloc((strlen(s_dir) + strlen(s_filename) +
+         strlen(s_filetype) + 2) * sizeof(char*));
+      strcpy(s_pathname, s_dir);
+      strcat(s_pathname, "/.");
+      strcat(s_pathname, s_filename);
+      strcat(s_pathname, s_filetype);
+      v_processor_load(h_processor, s_pathname); /* Load settings */
+   }
+}
+
 /* Reset processor */
 void v_processor_reset(oprocessor *h_processor) {
    int i_count;
-   debug(fprintf(stderr,"Reset\n"));
    h_processor->first = 0; h_processor->last = REG_SIZE - 1;
    for (i_count = 0; i_count < REGISTERS - 2; i_count++) /*Clear the CPU registers and stack */
       v_reg_copy(h_processor, h_processor->reg[i_count], NULL); /* Copying nothing to a register clears it */
@@ -493,9 +506,8 @@ void v_processor_reset(oprocessor *h_processor) {
    h_processor->code = 0;
    h_processor->keypressed = False;
    h_processor->enabled = True;
-   h_processor->status[5] = False; /* TO DO - Check which flags should be set by default */
+   h_processor->status[5] = True; /* TO DO - Check which flags should be set by default */
    h_processor->flags[MODE] = True; /* Select run mode */
-   v_processor_restore(h_processor);
 }
 
 /* Create a new processor , */
@@ -573,7 +585,9 @@ void v_processor_tick(oprocessor *h_processor) {
          h_processor->status[15] = True; /* Set status bit if key pressed */
       if (h_processor->select)
          h_processor->status[3] = True; /* Set status bit based on switch position */
-      h_processor->status[5] = True; /* Power OK */
+#ifndef SPICE /* Setting S(5) here breaks the self test on Spice machines */
+      h_processor->status[5] = True; /* Low Power (Woodstock)/ Self Test (Spice) */
+#endif
 
       i_opcode = h_processor->rom[h_processor->pc]; /* Get next instruction */
 
@@ -588,7 +602,6 @@ void v_processor_tick(oprocessor *h_processor) {
             case 01:
                switch (i_opcode){
                case 00020: /* keys -> rom address */
-                  debug(fprintf(stdout, "%05o %04o\tkeys -> rom address (%05o)\n", h_processor->pc, i_opcode, (((h_processor->pc + 1) & 0x0f00) + h_processor->code)));
                   if (h_processor->flags[TRACE]) fprintf(stdout, "keys -> rom address");
                   h_processor->pc++;
                   h_processor->pc &= 0x0f00;
@@ -664,18 +677,20 @@ void v_processor_tick(oprocessor *h_processor) {
                      h_processor->addr = i_addr;
                      if (i_addr < MEMORY_SIZE)
                         h_processor->addr = i_addr;
-                     else
-                        v_error("Address %02o out of range at %05o in %s line : %d\n", i_addr, h_processor->pc, __FILE__, __LINE__);
+                     else {
+                        h_processor->addr = MEMORY_SIZE - 1;
+                        v_warning("Address %02o out of range at %05o in %s line : %d\n", i_addr, h_processor->pc, __FILE__, __LINE__);
+                     }
                   }
                   break;
                case 01260: /* clear data registers */
                   if (h_processor->flags[TRACE]) fprintf(stdout, "clear data registers");
-                     if (!CONTINIOUS) {
-                        int i_count;
-                        h_processor->first = 0; h_processor->last = REG_SIZE - 1;
-                        for (i_count = 0; i_count < MEMORY_SIZE; i_count++)
-                           v_reg_copy(h_processor, h_processor->mem[i_count], NULL); /* Copying nothing to a register clears it */
-                     }
+                  if (!CONTINIOUS) {
+                     int i_count;
+                     h_processor->first = 0; h_processor->last = REG_SIZE - 1;
+                     for (i_count = 0; i_count < MEMORY_SIZE; i_count++)
+                        v_reg_copy(h_processor, h_processor->mem[i_count], NULL); /* Copying nothing to a register clears it */
+                  }
                   break;
                case 01360: /* c -> data */
                   if (h_processor->flags[TRACE]) fprintf(stdout, "c -> data");
@@ -684,6 +699,10 @@ void v_processor_tick(oprocessor *h_processor) {
                   break;
                case 01460: /* rom checksum */
                   if (h_processor->flags[TRACE]) fprintf(stdout, "rom checksum");
+                  h_processor->status[5] = False;
+                  /* h_processor->flags[CARRY] = True; */
+                  h_processor->sp = (h_processor->sp - 1) & (STACK_SIZE - 1); /* Update stack pointer */
+                  h_processor->pc = h_processor->stack[h_processor->sp]; /* Pop program counter on the stack */
                   break;
                case 01760: /* hi I'm woodstock */
                   if (h_processor->flags[TRACE]) fprintf(stdout, "hi I'm woodstock");
@@ -740,7 +759,7 @@ void v_processor_tick(oprocessor *h_processor) {
                         switch (i_count) {
                            case 1:  /* Scientific notation */
                            case 2:  /* Auto Enter (if set entering digit will push 'X') */
-                           case 5:  /* Low power warning */
+                           case 5:  /* Low power (Woodstock) / Self test (Spice) */
                            case 15: /* Set if any key is pressed */
                               break;
                            default:
