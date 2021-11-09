@@ -1,6 +1,6 @@
 ## x11-calc - Another RPN (Reverse Polish) calculator.
 
-![HP21](./img/x11-calc-21.png) ![HP22](./img/x11-calc-22.png) ![HP25](./img/x11-calc-25.png) 
+![HP21](./img/x11-calc-21.png) ![HP22](./img/x11-calc-22.png) ![HP25](./img/x11-calc-25.png)
 
 ![HP27](./img/x11-calc-27.png) ![HP29](./img/x11-calc-29.png)
 
@@ -16,18 +16,13 @@ running on either VAX or Alpha processors, and Tru64 Unix running on Alpha.
 
 ### Latest News
 
-Added continuous memory to models that support it.  The contents of program
-and  data registers are saved in a hidden file in the users' HOME directory
-when the program exits or the calculator is switched off, and restored when
-the application is loaded or is reset using 'Ctrl-C'.
+Successfully tested on the Raspberry Pi 3 and Raspberry Pi 4.
 
 ### Status
 
-Currently very much work in progress. The CPU simulation code is now mostly
-complete but several important features required by later calculator models
-have not yet be implemented.
+Mostly working, next goal is to be able simulate the HP34C.
 
-##### HP 21 - Working 
+##### HP 21 - Working
 
 ##### HP 22 - Working
 The  following issues were observed when checking the behaviour against the
@@ -39,6 +34,7 @@ examples in the owners handbook..
 ##### HP 27 - Completed (not finished testing)
 
 ##### HP 29 - Working
+* All registers behave as continuous memory (not correct)
 
 ##### HP 31 - Working
 
@@ -60,10 +56,10 @@ e.g:
     $ unzip master.zip
     $ cd x11-calc-master
     $ make all
-    
+
     $ ./bin/x11-calc-29
     x11-calc-29: Version 0.4 [Commit ID: 81c55be] 16 Oct 21 21:15:00 (Build: 0067)
-    ROM Size : 4096 words 
+    ROM Size : 4096 words
 
 ### Keyboard Shortcuts
 
@@ -73,7 +69,7 @@ The following keyboard shortcuts should work:
 (when using numeric key pad you need to use numlock as usual).
 
 'Esc' is 'Clx', 'c' is CHS, 'e' is 'EEX' and on programmable models 'Space'
-corresponds to 'SST'. 
+corresponds to 'SST'.
 
 'f' and where applicable 'g' and 'h' correspond to the function keys.
 
@@ -81,40 +77,51 @@ corresponds to 'SST'.
 memory 'Ctrl-Z' saves the current register contents, and 'Ctrl-C'  restores
 them to the original saved state.
 
+### Loading and saving
+
+For  models with continuous memory the contents of program memory and  data
+registers are saved in a hidden file in the users' HOME directory when  the
+program  exits  or the calculator is switched off, and restored  from  this
+hidden file when the simulator is loaded or reset using 'Ctrl&#8209;C'
+
+    ~/.x11-calc-nn.dat
+
+When  starting the simulator the name of the data file used to restore  the
+saved state can be specified on the command line allowing previously  saved
+copies of programs to be loaded automatically when the simulator starts  or
+the  simulator is reset using 'Ctrl&#8209;C'.  However, any changes will be saved
+in hidden data file.
+
 ### Debugging
 
-You  can  start the simulation in trace mode using '-t', or in single  step 
-mode using '-s', and set a breakpoint using '-b <octal address>'.
+You  can  start the simulation in trace mode using '&#8209;t', or in single  step
+mode using '&#8209;s', and set a breakpoint using '&#8209;b &lt;octal address&gt;'.
 
-'Ctrl-T'  also toggles trace mode when running, 'Ctrl-S' executes the  next
-instruction, 'Ctrl-Q' resumes execution, and 'Ctrl-R' displays the contents
-of the CPU registers .  
+'Ctrl&#8209;T'  also toggles trace mode when running, 'Ctrl&#8209;S' executes the  next
+instruction, 'Ctrl&#8209;Q' resumes execution, and 'Ctrl&#8209;R' displays the contents
+of the CPU registers .
 
 When in trace mode a jump to the same instruction produces no output.
 
 ### Known Issues
 
-Need  to sort out colour mapping to allow program to run on a display  with
-less than 24 -bit colour - may get round to this be one day...
+The simulators requires a 24&#8209;bit colour display.
 
-The  X11 implementation on the Raspberry Pi 4 is just too slow to draw  the
-display without it flickering (but it works well on the Jetson Nano, and an
-old Intel Atom based netbook). I suspect that rewriting the display code to
-use  a custom font or a fixed size bitmap for each digit instead of drawing
-each segment individually might speed things up. 
+On a Raspberry Pi the display is not updated properly if either FKMS or KMS
+graphics overlays are enabled.  The following entries in '/boot/config.txt'
+should be commented out as shown.
+
+    #dtoverlay=vc4-fkms-v3d
+    #dtoverlay=vc4-kms-v3d
 
 ### Prerequisites
 
 The following packages are required to build and/or run the simulator.
 
-- Debian : gcc, make, libx11-dev, libc6-dev, xfonts-base
+- Debian : gcc, make, libx11&#8209;dev, libc6&#8209;dev, xfonts&#8209;base
 
-- Ubuntu : gcc, make, libx11-dev, libc6-dev, xfonts-base
+- Ubuntu : gcc, make, libx11&#8209;dev, libc6&#8209;dev, xfonts&#8209;base
 
-- Fedora : gcc, make, libx11-dev, libc6-dev, xorg-x11-xfonts-base
+- Fedora : gcc, make, libx11&#8209;dev, libc6&#8209;dev, xorg&#8209;x11&#8209;xfonts&#8209;base
 
-- Gentoo : gcc, make, libx11-dev, libc6-dev, font-misc-misc
-
-- Arch   : gcc, make, libx11-dev, libc6-dev, xorg-fonts-misc ?
-
-- Alpine : gcc, make, libx11-dev, libc6-dev, font-misc-misc ?
+- Gentoo : gcc, make, libx11&#8209;dev, libc6&#8209;dev, font&#8209;misc&#8209;misc
