@@ -1,37 +1,32 @@
 /*
- * x11-calc-29.h - RPN (Reverse Polish) calculator simulator.
+ * x11-calc-37.h - RPN (Reverse Polish) calculator simulator.
  *
- * Copyright(C) 2018   MEJT
+ * Copyright(C) 2018   MT
  *
  * Model specific constants and function prototypes.
  *
- * This  program is free software: you can redistribute it and/or modify  it
- * under  the  terms of the GNU General Public License as published  by  the
- * Free  Software  Foundation, either version 3 of the License, or (at  your
+ * This  program is free software: you can redistribute it and/or modify it
+ * under  the terms of the GNU General Public License as published  by  the
+ * Free  Software Foundation, either version 3 of the License, or (at  your
  * option) any later version.
  *
- * This  program  is  distributed in the hope that it will  be  useful,  but
- * WITHOUT   ANY   WARRANTY;   without  even   the   implied   warranty   of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+ * This  program  is distributed in the hope that it will  be  useful,  but
+ * WITHOUT   ANY   WARRANTY;   without even   the   implied   warranty   of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  *
- * You  should have received a copy of the GNU General Public License  along
+ * You  should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * 26 Sep 21         - Initial version - MEJT
- * 12 Oct 21         - Added macro definition for continuous memory - MT
- * 04 Nov 21         - Allows size of the window to be changed by modifying
- *                     the value of SCALE at compile time - MT
- * 16 Nov 21         - Can now define the horizontal and vertical scales to
- *                     independently of each other - MT
+ * 02 Dec 21   0.1   - Initial version - MT
  */
 
-#define MODEL           "27"
+#define MODEL           "37"
 #define HEIGHT          385 * SCALE_HEIGHT
 #define WIDTH           200 * SCALE_WIDTH
 #define BUTTONS         30
 
-#define DIGITS          12
+#define DIGITS          11
 
 #define DISPLAY_LEFT    0
 #define DISPLAY_TOP     4 * SCALE_HEIGHT
@@ -64,9 +59,10 @@
 #define KEY_HEIGHT      30 * SCALE_HEIGHT
 #define SWITCH_HEIGHT   10 * SCALE_HEIGHT
 
-#define MEMORY_SIZE     16
-#define ROM_SIZE        06000
+#define ROM_SIZE        05000
+#define MEMORY_SIZE     9
 #define ROM_BANKS       1
+#define SPICE           True
 #define CONTINIOUS      False
 
 int i_rom [ROM_SIZE * ROM_BANKS];

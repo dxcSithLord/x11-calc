@@ -33,13 +33,14 @@
  *                     released does NOT work!) - MT
  * 30 Sep 21         - Added properties for enable and select - MT
  * 26 Oct 21         - Added definition for processor_load() - MT
+ * 28 Nov 21         - Made the trace flag a processor property - MT
  */
 
 #ifndef REGISTERS
 #include "x11-calc.h"
 
 #define REGISTERS      8     /* A, B, C(X), D(Y), E(Z), F(T), M, N(M2) */
-#define FLAGS          10
+#define FLAGS          9
 #define REG_SIZE       14
 #define EXP_SIZE       3     /* Two digit exponent plus a sign digit */
 #define STACK_SIZE     2
@@ -60,7 +61,6 @@
 #define BANK_SWITCH    4
 #define DISPLAY_ENABLE 5
 #define TIMER          8
-#define TRACE          9
 
 typedef struct {
    char id;
@@ -73,21 +73,24 @@ typedef struct {
    int *rom;
    int first;
    int last;
-   unsigned int rom_number;         /* ROM number */
-   unsigned int delayed_rom_number; /* Delayed ROM number */
-   unsigned char flags[FLAGS];      /* Processor flags + TRACE flag*/
+   unsigned char flags[FLAGS];      /* Processor flags*/
    unsigned char status[16];        /* Status (S0 - S15) */
    unsigned int stack[STACK_SIZE];  /* Call stack */
+   unsigned int opcode;             /* Last opcode */
+   unsigned int bank;               /* Bank number */
    unsigned int pc;                 /* Program counter */
    unsigned int sp;                 /* Stack pointer */
-   unsigned int p;                  /* P register */
    unsigned int f;                  /* F register */
+   unsigned int p;                  /* P register */
    unsigned int addr;               /* Address register */
    unsigned int base;               /* Current arithmetic base */
    unsigned int code;               /* Key code */
+   unsigned int rom_number;         /* Delayed ROM number */
    unsigned char keypressed;        /* Key pressed */
    unsigned char select;            /* Save switch state */
    unsigned char enabled;           /* Enabled */
+   unsigned char trace;             /* Trace flag */
+   unsigned char step;              /* Step flag */
 } oprocessor;
 
 oprocessor *h_processor_create(int *h_rom);
@@ -104,5 +107,5 @@ void v_processor_tick(oprocessor *h_procesor);
 
 void v_reg_load(oregister *h_register, ...);
 
-void v_fprint_state(FILE *h_file, oprocessor *h_procesor);
+void v_fprint_registers(FILE *h_file, oprocessor *h_procesor);
 #endif

@@ -4,44 +4,55 @@
 
 ![HP27](./img/x11-calc-27.png) ![HP29](./img/x11-calc-29.png)
 
-![HP31](./img/x11-calc-31.png) ![HP32](./img/x11-calc-32.png) ![HP33](./img/x11-calc-33.png)
+![HP31](./img/x11-calc-31.png) ![HP32](./img/x11-calc-32.png) ![HP33](./img/x11-calc-33.png) ![HP34](./img/x11-calc-34.png)
 
-Written in C using X11.
+![HP37](./img/x11-calc-37.png) ![HP38](./img/x11-calc-38.png)
+
+Written in C using just X11.
 
 Use  of any language extensions or non standard language features has  been
-avoided in order to try to make the code as portable as possible. Currently
-it will only compile without modification on Linux (Debian 10), but as with
-earlier  versions of the intention is to be able to compile the code on VMS
-running on either VAX or Alpha processors, and Tru64 Unix running on Alpha.
+avoided in order to try to make the code as portable as possible.
+
+Currently compiles without modification on Linux, VAX/VMS, and  Tru64 Unix.
 
 ### Latest News
 
-Successfully tested on the Raspberry Pi 3 and Raspberry Pi 4.
+04/12 - HP38C working but not tested.
+
+02/12 - HP37E working but not tested.
+
+28/11 - HP34C now working!!
 
 ### Status
-
-Mostly working, next goal is to be able simulate the HP34C.
 
 ##### HP 21 - Working
 
 ##### HP 22 - Working
-The  following issues were observed when checking the behaviour against the
-examples in the owners handbook..
 * The examples on pages 65, 66 and 76 only work if END is selected.
 
-##### HP 25 - Working (now with continuous memory)
+##### HP 25 - Working
 
-##### HP 27 - Completed (not finished testing)
+##### HP 27 - Completed
 
 ##### HP 29 - Working
-* All registers behave as continuous memory (not correct)
 
 ##### HP 31 - Working
 
-##### HP 32 - Completed (not finished testing)
-* Hangs after self test
+##### HP 32 - Completed
+* Working but hangs after self test completes
 
 ##### HP 33 - Working
+
+##### HP 34 - Working
+
+##### HP 37 - Completed
+* Not fully tested
+
+##### HP 38 - Completed
+* Not fully tested
+
+##### HP 67 - Work in progress
+
 
 ### Compiling
 
@@ -63,13 +74,13 @@ e.g:
 
 ### Keyboard Shortcuts
 
-The following keyboard shortcuts should work:
+The following keyboard shortcuts should work on Linux:
 
 '0' - '9', '+'. '-'. '*'. '/' and 'Enter' should do what you expect them to
 (when using numeric key pad you need to use numlock as usual).
 
-'Esc' is 'Clx', 'c' is CHS, 'e' is 'EEX' and on programmable models 'Space'
-corresponds to 'SST'.
+'Esc' or 'Backspace' is 'Clx', 'c' is CHS, 'e' is 'EEX' and on programmable
+models 'Space' corresponds to 'SST'.
 
 'f' and where applicable 'g' and 'h' correspond to the function keys.
 
@@ -89,8 +100,13 @@ hidden file when the simulator is loaded or reset using 'Ctrl&#8209;C'
 When  starting the simulator the name of the data file used to restore  the
 saved state can be specified on the command line allowing previously  saved
 copies of programs to be loaded automatically when the simulator starts  or
-the  simulator is reset using 'Ctrl&#8209;C'.  However, any changes will be saved
-in hidden data file.
+the  simulator is reset using 'Ctrl&#8209;C'.  However, any changes will be
+saved in the hidden data file.
+
+### Exiting
+
+Clicking  on the On/Off switch will turn the simulator on and off,  but  if
+you hold down the off switch down for two seconds the program will exit.
 
 ### Debugging
 
@@ -105,7 +121,12 @@ When in trace mode a jump to the same instruction produces no output.
 
 ### Known Issues
 
-The simulators requires a 24&#8209;bit colour display.
+HP32 hangs after self test.
+
+Keyboard shortcuts only work on Linux.
+
+On  UNIX/Linux a 24&#8209;bit colour display is required, while on VMS  the
+simulator requires a black and white display.
 
 On a Raspberry Pi the display is not updated properly if either FKMS or KMS
 graphics overlays are enabled.  The following entries in '/boot/config.txt'
@@ -113,6 +134,22 @@ should be commented out as shown.
 
     #dtoverlay=vc4-fkms-v3d
     #dtoverlay=vc4-kms-v3d
+
+### Tested
+
+- Debian 10 (Buster), GCC 8.3.0, x64
+
+- Debian 10 (Buster), GCC 8.3.0, arm
+
+- Debian 9 (Stretch), GCC 6.3.0, arm
+
+- Debian 5 (Lenny), GCC 4.2.4, alpha
+
+- Fedora 34, GCC 11.2.1, x64
+
+- Ubuntu 20.04, GCC 9.3.0, x64
+
+- VAX/VMS 5.4-3, VAXC 3.2, VAX (simh)
 
 ### Prerequisites
 
