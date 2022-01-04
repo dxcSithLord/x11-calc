@@ -30,6 +30,8 @@
  * 16 Nov 21         - Can now define the horizontal and vertical scales to
  *                     independently of each other - MT
  * 22 Nov 21         - Only saves the state of continuous registers - MT
+ * 22 Dec 21         - Removed SPICE symbol - MT
+ *
  */
 
 #define MODEL           "33"
@@ -73,8 +75,7 @@
 #define ROM_SIZE        010000
 #define MEMORY_SIZE     21
 #define ROM_BANKS       1
-#define SPICE           True
-#define CONTINIOUS      True
+#define CONTINIOUS
 
 int i_rom [ROM_SIZE * ROM_BANKS];
 
