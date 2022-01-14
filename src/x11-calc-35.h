@@ -19,6 +19,7 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * 04 Jan 22         - Initial version (50th anniversary) - MT
+ * 11 Jan 22         - Removed ROM_BANKS - MT
  *
  */
 
@@ -45,10 +46,9 @@
 #define KEY_GAP          3 * SCALE_WIDTH
 #define SWITCH_HEIGHT   10 * SCALE_HEIGHT
 
-#define ROM_SIZE        02000
+#define ROM_SIZE        01400
 #define MEMORY_SIZE     1
-#define ROM_BANKS       1
 
-int i_rom [ROM_SIZE * ROM_BANKS];
+int i_rom [ROM_SIZE];
 
 void v_init_keypad(obutton *h_button[], oswitch *h_switch[]);

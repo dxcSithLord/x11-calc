@@ -19,22 +19,27 @@ Should compile without modification on Linux, VAX/VMS, and Tru64 Unix.
 
 ![HP35](./img/x11-calc-35.png) ![HP80](./img/x11-calc-80.png) ![HP45](./img/x11-calc-45.png)
 
+Adding new simulators can introduce regression bugs in the existing code so
+the code has been split into two branches stable and unstable, changes will
+only be merged into the stable branch when every thing has been retested.
+
 ### Latest News
 
-05/01 - Added HP80.
+12/01 - Most bugs are now fixed.
 
-04/01 - Added HP35 (50 years after the launch of the original) !
+10/01 - Split code into two branches, stable and unstable.
 
-04/01 - HP45 working.
+04/01 - Added HP35 (50 years after the launch of the original)!
 
 ### Status
 
 ##### HP 35 - Working
 
-##### HP 80 - Completed
-* Not fully tested.
+##### HP 80 - Working
 
 ##### HP 45 - Working
+
+##### HP 70 - Working
 
 ##### HP 21 - Working
 
@@ -43,27 +48,24 @@ Should compile without modification on Linux, VAX/VMS, and Tru64 Unix.
 
 ##### HP 25 - Working
 
-##### HP 27 - Completed
-* Not fully tested.
+##### HP 27 - Working
 
 ##### HP 29 - Working
 
 ##### HP 31 - Working
 
-##### HP 32 - Completed
-* Working but hangs after self test completes.
+##### HP 32 - Working
 
 ##### HP 33 - Working
 
 ##### HP 34 - Working
 
 ##### HP 37 - Completed
-* Not fully tested.
+* Fails self test.
 
 ##### HP 38 - Completed
-* Not fully tested.
 
-##### HP 67 - Mostly working
+##### HP 67 - Not working
 * Cannot read or write to magnetic cards.
 * Has continuous memory.
 
@@ -76,9 +78,9 @@ new folder run 'make all' to build all the available simulators.
 
 e.g:
 
-    $ wget https://github.com/mike632t/x11-calc/archive/refs/heads/master.zip
-    $ unzip master.zip
-    $ cd x11-calc-master
+    $ wget https://github.com/mike632t/x11-calc/archive/refs/heads/stable.zip
+    $ unzip stable.zip
+    $ cd x11-calc-stable
     $ make all
 
     $ ./bin/x11-calc-29
@@ -136,8 +138,9 @@ When in trace mode a jump to the same instruction produces no output.
 
 ### Known Issues
 
-On  UNIX/Linux a 24&#8209;bit colour display is required, while on VMS  the
-simulator requires a black and white display.
+On UNIX/Linux a 24 bit colour display is required.
+
+VMS only supports a black and white display.
 
 Keyboard shortcuts only work on Linux.
 
@@ -150,9 +153,6 @@ should be commented out as shown.
 
 HP67 is unable to read or write to magnetic cards.
 
-HP32 hangs after self test.
-
-HP35 and HP80 report an incorrect ROM size.
 
 ### Tested
 
@@ -183,7 +183,6 @@ The following packages are required to build and/or run the simulator.
 - Debian : gcc, make, libx11&#8209;dev, libc6&#8209;dev, xfonts&#8209;base
 
 - Ubuntu : gcc, make, libx11&#8209;dev, libc6&#8209;dev, xfonts&#8209;base
-
 
 ### Problem Reports
 

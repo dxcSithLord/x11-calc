@@ -1,5 +1,5 @@
 /*
- * x11-calc-80.h - RPN (Reverse Polish) calculator simulator.
+ * x11-calc-70.h - RPN (Reverse Polish) calculator simulator.
  *
  * Copyright(C) 2018   MEJT
  *
@@ -18,12 +18,13 @@
  * You  should have received a copy of the GNU General Public License  along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * 04 Jan 22         - Initial version - MT
+ * 05 Jan 22         - Initial version - MT
+ * 07 Jan 22         - Fixed number of registers - MT
  * 11 Jan 22         - Removed ROM_BANKS - MT
  *
  */
 
-#define MODEL           "80"
+#define MODEL           "70"
 #define HEIGHT          450 * SCALE_HEIGHT
 #define WIDTH           200 * SCALE_WIDTH
 #define BUTTONS         35
@@ -46,8 +47,8 @@
 #define KEY_GAP          3 * SCALE_WIDTH
 #define SWITCH_HEIGHT   10 * SCALE_HEIGHT
 
-#define ROM_SIZE        03400
-#define MEMORY_SIZE     1
+#define ROM_SIZE        04000
+#define MEMORY_SIZE     10
 
 int i_rom [ROM_SIZE];
 

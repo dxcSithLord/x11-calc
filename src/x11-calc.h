@@ -42,7 +42,12 @@
  * 25 Nov 21         - Added HP34C - MT
  * 06 Dev 21         - Added HP67 - MT
  * 20 Dec 21         - Changed all #ifdef to #if defined() - MT
- * 30 Dec 21         - Changed HP model 25C to just HP model 25 - MT
+ * 24 Dec 21         - Added HP model 45 - MT
+ * 30 Dec 21         - Changed HP25C window title to HP25 - MT
+ * 04 Jan 22         - Added HP 5 and HP 80 - MT
+ * 05 Jan 22         - Added HP 70 - MT
+ * 07 Jan 22         - Changed HP25 window title back to HP25C - MT
+ *                   - Added HP70 - MT
  *
  * TO DO :           -
  */
@@ -84,6 +89,11 @@
 #define TITLE        "RPN calc 45"
 #include "x11-calc-45.h"
 
+#elif defined(HP70)
+#define FILENAME     "x11-calc-70"
+#define TITLE        "RPN calc 70"
+#include "x11-calc-70.h"
+
 #elif defined(HP21)
 #define FILENAME     "x11-calc-21"
 #define TITLE        "RPN calc 21"
@@ -96,7 +106,7 @@
 
 #elif defined(HP25)
 #define FILENAME     "x11-calc-25"
-#define TITLE        "RPN calc 25"
+#define TITLE        "RPN calc 25C"
 #include "x11-calc-25.h"
 
 #elif defined(HP27)

@@ -38,6 +38,9 @@
  *                     flags to support the HP67 - MT
  * 21 Dec 21         - Added the READY flag to allow the HP67 to behave  as
  *                     if it has continuous memory - MT
+ * 12 Jan 22         - Added a timer property to the processor to allow the
+ *                     processor  status bit to be set appropriately if the
+ *                     timer is enabled - MT
  *
  */
 
@@ -101,7 +104,6 @@ typedef struct {
    unsigned char status[STATUS_BITS];  /* Status (S0 - S15) */
    unsigned int stack[STACK_SIZE];     /* Call stack */
    unsigned int opcode;                /* Last opcode */
-   unsigned int bank;                  /* Bank number */
    unsigned int pc;                    /* Program counter */
    unsigned int sp;                    /* Stack pointer */
    unsigned int f;                     /* F register */
@@ -111,7 +113,8 @@ typedef struct {
    unsigned int code;                  /* Key code */
    unsigned int rom_number;            /* Delayed ROM number */
    unsigned char keypressed;           /* Key pressed */
-   unsigned char select;               /* Save switch state */
+   unsigned char select;               /* Save run/prgm switch state */
+   unsigned char timer;                /* Save timer switch state */
    unsigned char enabled;              /* Enabled */
    unsigned char trace;                /* Trace flag */
    unsigned char step;                 /* Step flag */
