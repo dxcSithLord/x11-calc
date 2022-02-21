@@ -1,31 +1,21 @@
 ## x11-calc - Another RPN (Reverse Polish) calculator.
 
-Written in C using just X11.
+Simulators for the HP 35, HP 80, HP 45, HP 70, HP 21, HP 22, HP 25C, HP 27,
+HP 29C, HP 31E, HP 32E, HP 33C, HP 34C, HP 37E, HP 38C and HP 67 written in
+C using only X11.
 
 Use  of any language extensions or non standard language features has  been
 avoided in order to try to make the code as portable as possible.
 
 Should compile without modification on Linux, VAX/VMS, and Tru64 Unix.
 
-![HP21](./img/x11-calc-21.png) ![HP22](./img/x11-calc-22.png) ![HP25](./img/x11-calc-25.png)
+![HP25](./img/x11-calc-25.png) ![HP29](./img/x11-calc-29.png) ![HP33](./img/x11-calc-33.png) ![HP34](./img/x11-calc-34.png)
 
-![HP27](./img/x11-calc-27.png) ![HP29](./img/x11-calc-29.png)
-
-![HP31](./img/x11-calc-31.png) ![HP32](./img/x11-calc-32.png) ![HP33](./img/x11-calc-33.png) ![HP34](./img/x11-calc-34.png)
-
-![HP37](./img/x11-calc-37.png) ![HP38](./img/x11-calc-38.png)
-
-![HP67](./img/x11-calc-67.png)
-
-![HP35](./img/x11-calc-35.png) ![HP80](./img/x11-calc-80.png) ![HP45](./img/x11-calc-45.png)
-
-Adding new simulators can introduce regression bugs in the existing code so
-the code has been split into two branches stable and unstable, changes will
-only be merged into the stable branch when every thing has been retested.
+More [screenshots](./img/)
 
 ### Latest News
 
-12/01 - Most bugs are now fixed.
+20/01 - Now compiles cleanly on VAX/VMS.
 
 10/01 - Split code into two branches, stable and unstable.
 
@@ -64,7 +54,7 @@ only be merged into the stable branch when every thing has been retested.
 
 ##### HP 38 - Completed
 
-##### HP 67 - Not working
+##### HP 67 - Working
 * Cannot read or write to magnetic cards.
 * Has continuous memory.
 
@@ -73,7 +63,7 @@ only be merged into the stable branch when every thing has been retested.
 To  build the simulator on Linux check that you have all the  prerequisites
 installed  then  download the source code from github and unzip it  (a  new
 folder  will  be created to automatically).  Then change directory  to  the
-new folder run 'make all' to build all the available simulators.
+new  folder run 'make all' build all the simulators.
 
 e.g:
 
@@ -93,14 +83,13 @@ The following keyboard shortcuts should work on Linux:
 '0' - '9', '+'. '-'. '*'. '/' and 'Enter' should do what you expect them to
 (when using numeric key pad you need to use numlock as usual).
 
-'Esc' or 'Backspace' is 'Clx', 'c' is CHS, 'e' is 'EEX' and on programmable
-models 'Space' corresponds to 'SST'.
-
-'A' - 'E' correspond to the function keys where they exist.
-
 'f' and where applicable 'g' and 'h' correspond to the shift keys.
 
-On financial models 'n' and 'i' correspond to the matching functions.
+'Esc' or 'Backspace' corresponds to 'Clx', 'c' to CHS, 'e' to 'EEX', and on
+financial models 'n' and 'i' correspond to 'n' and 'i' if not shifted.
+
+On programmable models 'A' - 'E' correspond to the function keys where they
+exist and 'Space' to 'SST' if not shifted
 
 'Ctrl-Z'  Quits,  and  'Ctrl-C' does a reset.  For models  with  continuous
 memory 'Ctrl-Z' saves the current register contents, and 'Ctrl-C'  restores
@@ -141,8 +130,6 @@ When in trace mode a jump to the same instruction produces no output.
 
 On UNIX/Linux a 24 bit colour display is required.
 
-VMS only supports a black and white display.
-
 Keyboard shortcuts only work on Linux.
 
 On a Raspberry Pi the display is not updated properly if either FKMS or KMS
@@ -152,8 +139,18 @@ should be commented out as shown.
     #dtoverlay=vc4-fkms-v3d
     #dtoverlay=vc4-kms-v3d
 
-HP67 is unable to read or write to magnetic cards.
+HP 67 is unable to read or write to magnetic cards.
 
+HP 37E fails self test.
+
+#### VMS Specific Issues
+
+Colour palette assumes a black and white display (if your system has 24-bit
+colour you can modify the definition of COLOUR_DEPTH in x11-calc.h to build
+the simulators with support for colour display).
+
+Not all text is visible due to the limited colour palette and the DEC fonts
+are missing some characters (for example the Pi symbol).
 
 ### Tested
 
@@ -188,7 +185,7 @@ The following packages are required to build and/or run the simulator.
 ### Problem Reports
 
 If you find problems or have suggestions relating to these simulators, then
-please create a new issue (https://github.com/mike632t/x11-calc/issues).
+please create a new [issue](https://github.com/mike632t/x11-calc/issues).
 
 Your problem report should contain:
 

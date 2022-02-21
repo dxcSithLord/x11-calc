@@ -187,6 +187,10 @@
  * 12 Jan 22         - Only sets mode switch state at start up - MT
  *                   - Checks  for breakpoints and instruction traps at the
  *                     same time - MT
+ * 21 Jan 22   0.1   - Moved text messages to a separate file  - MT
+ * 23 Jan 22         - Removed unwanted debug code - MT
+ * 29 Jan 22         - Added an optional bezel to the display, not that you
+ *                     will see it yet - MT
  *
  * To Do             - Parse command line in a separate routine.
  *                   - Allow VMS users to set breakpoints?
@@ -198,8 +202,8 @@
 
 #define NAME           "x11-calc"
 #define VERSION        "0.8"
-#define BUILD          "0090"
-#define DATE           "12 Jan 22"
+#define BUILD          "0092"
+#define DATE           "29 Jan 22"
 #define AUTHOR         "MT"
 
 #define INTERVAL 25    /* Number of ticks to execute before updating the display */
@@ -229,54 +233,10 @@
 
 #include "x11-keyboard.h"
 
+#include "x11-calc-messages.h"
+
 #include "gcc-debug.h" /* print() */
 #include "gcc-wait.h"  /* i_wait() */
-
-#if defined(unix)
-
-const char * c_msg_usage = "Usage: %s [OPTION]... [FILE]\n\
-An RPN Calculator simulation for X11.\n\n\
-  -b  ADDR                 set break-point (octal)\n\
-  -i, OPCODE               break when specified instruction is executed\n\
-  -s,                      start in single step\n\
-  -t,                      trace execution\n\
-      --cursor             display cursor (default)\n\
-      --no-cursor          hide cursor\n\
-      --help               display this help and exit\n\
-      --version            output version information and exit\n\n";
-const char * h_err_invalid_operand = "invalid operand(s)\n";
-const char * h_err_invalid_option = "invalid option -- '%c'\n";
-const char * h_err_unrecognised_option = "unrecognised option '%s'\n";
-const char * h_err_invalid_number = "not an octal number -- '%s' \n";
-const char * h_err_address_range = "out of range -- '%s' \n";
-const char * h_err_missing_argument = "option requires an argument -- '%s'\n";
-const char * h_err_invalid_argument = "expected argument not -- '%c' \n";
-
-#else
-
-const char * c_msg_usage = "Usage: %s [OPTION...] [FILE]\n\
-An RPN Calculator simulation for X11.\n\n\
-  /cursor                  display cursor (default)\n\
-  /nocursor                hide cursor\n\
-  /step                    trace execution\n\
-  /trace                   trace execution\n\
-  /version                 output version information and exit\n\n\
-  /?, /help                display this help and exit\n";
-
-const char * h_err_invalid_operand = "invalid parameter(s)\n";
-const char * h_err_invalid_option = "invalid option %s\n";
-
-#endif
-
-const char * h_msg_licence = "Copyright(C) %s %s\n\
-License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.\n\
-This is free software: you are free to change and redistribute it.\n\
-There is NO WARRANTY, to the extent permitted by law.\n";
-
-const char * h_err_display = "Cannot connect to X server '%s'.\n";
-const char * h_err_display_properties = "Unable to get display properties.\n";
-const char * h_err_display_colour = "Requires a %d-bit colour display.\n";
-const char * h_err_font = "Cannot load font '%s'.\n";
 
 void v_version() /* Display version information */
 {
@@ -576,7 +536,9 @@ int main(int argc, char *argv[])
 
    v_init_keypad(h_button, h_switch); /* Create buttons */
 
-   h_display = h_display_create(0, DISPLAY_LEFT, DISPLAY_TOP, DISPLAY_WIDTH, DISPLAY_HEIGHT, RED, DARK_RED, RED_BACKGROUND); /* Create display */
+   h_display = h_display_create(0, BEZEL_LEFT, BEZEL_TOP, BEZEL_WIDTH, BEZEL_HEIGHT,
+      DISPLAY_LEFT, DISPLAY_TOP, DISPLAY_WIDTH, DISPLAY_HEIGHT, DIGIT_COLOUR, DIGIT_BACKGROUND,
+      DISPLAY_BACKGROUND, BEZEL_COLOUR); /* Create display */
 
 #if defined(linux)
    h_keyboard = h_keyboard_create(x_display); /* Only works with Linux */
@@ -715,7 +677,6 @@ int main(int argc, char *argv[])
                      i_button_draw(x_display, x_application_window, i_screen, h_pressed);
                      h_processor->code = h_pressed->index;
                      h_processor->keypressed = True;
-                     debug(fprintf(stderr, "Button pressed - keycode(%.2X).\n", h_pressed->index));
                      break;
                   }
                }
@@ -735,14 +696,12 @@ int main(int argc, char *argv[])
                         h_processor->enabled = False; /* Disable the processor */
                         i_ticks = DELAY; /* Set count down */
                      }
-                     debug(fprintf(stderr, "Switch pressed (%s).\n", h_switch[0]->state ? "On" : "Off"));
                   }
                   if (!(h_switch_pressed(h_switch[1], x_event.xbutton.x, x_event.xbutton.y) == NULL))
                   {
                      h_switch[1]->state = !(h_switch[1]->state); /* Toggle switch */
                      i_switch_draw(x_display, x_application_window, i_screen, h_switch[1]);
                      h_processor->select = h_switch[1]->state;
-                     debug(fprintf(stderr, "Switch pressed (%s).\n", h_switch[1]->state ? "On" : "Off"));
                   }
                }
             }
@@ -755,18 +714,10 @@ int main(int argc, char *argv[])
                   h_pressed->state = False;
                   i_button_draw(x_display, x_application_window, i_screen, h_pressed);
                   h_processor->keypressed = False; /* Don't clear the status bit here!! */
-                  debug(fprintf(stderr, "Button released - keycode(%.2X).\n", h_pressed->index));
                }
-               if (h_pressed == NULL)
-               { /* It wasn't a button that was released check the switches */
+               if (h_pressed == NULL) /* It wasn't a button that was released so check the switches */
                   if (!(h_switch_pressed(h_switch[0], x_event.xbutton.x, x_event.xbutton.y) == NULL))
-                  {
                      i_ticks = -1;
-                     debug(fprintf(stderr, "Switch released (%s).\n", h_switch[0]->state ? "On" : "Off"));
-                  }
-                  if (!(h_switch_pressed(h_switch[1], x_event.xbutton.x, x_event.xbutton.y) == NULL))
-                     debug(fprintf(stderr, "Switch released (%s).\n", h_switch[1]->state ? "On" : "Off"));
-               }
             }
             break;
          case Expose : /* Draw or redraw the window */

@@ -38,17 +38,20 @@
 #   3 Oct 21	0.10	- Fixed issue with backup file name - MT
 #   9 Oct 21	0.11	- Moved source code and executable files into separate
 #							  folders - MT
+#  21 Jan 22         - Moved text messages to a separate file  - MT
+#  22 jan 22			- Define a symbol for the current language - MT
 #
 
 MODEL		= 21
 PROGRAM	= x11-calc
 SOURCES 	= x11-calc.c x11-calc-cpu.c x11-calc-display.c x11-calc-segment.c
 SOURCES 	+= x11-calc-button.c x11-calc-switch.c x11-calc-label.c x11-calc-colour.c
-SOURCES 	+= x11-keyboard.c gcc-wait.c
+SOURCES 	+= x11-keyboard.c x11-calc-messages.c gcc-wait.c
 FILES		= *.c *.h LICENSE README.md makefile x11-calc-instruction-set.md .gitignore .gitattributes
 FILES		+= x11-calc-*.png
 OBJECTS	= $(SOURCES:.c=.o)
 OUTPUT	= $(PROGRAM).out
+LANG		= LANG_$(shell (echo $$LANG | cut -f 1 -d '_'))
 LIBS		= -lX11 -lm
 FLAGS		= -fcommon -Wall -pedantic -ansi -std=gnu99
 FLAGS		+= -Wno-comment -Wno-deprecated-declarations -Wno-builtin-macro-redefined
@@ -58,7 +61,7 @@ CC			= gcc
 
 
 all: clean ../bin/$(PROGRAM)-$(MODEL) $(OBJECTS)
-FLAGS		+= -D HP$(MODEL)
+FLAGS		+= -D HP$(MODEL) -D $(LANG)
 SOURCES 	+= x11-calc-$(MODEL).c
 
 ../bin/$(PROGRAM)-$(MODEL): $(OBJECTS)

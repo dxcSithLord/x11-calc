@@ -25,6 +25,9 @@
  * 16 Nov 21         - Can now define the horizontal and vertical scales to
  *                     independently of each other - MT
  * 11 Jan 22         - Removed ROM_BANKS - MT
+ * 20 Jan 22         - Fixed compilation warnings on VAXC by defining i_rom
+ *                     as external - MT
+ * 29 Jan 22         - Added an optional bezel to the display - MT
  *
  */
 
@@ -35,8 +38,18 @@
 
 #define DIGITS          12
 
-#define DISPLAY_LEFT    0
-#define DISPLAY_TOP     4 * SCALE_HEIGHT
+#define DIGIT_COLOUR       RED
+#define DIGIT_BACKGROUND   DARK_RED
+#define DISPLAY_BACKGROUND RED_BACKGROUND
+#define BEZEL_COLOUR       LIGHT_GREY
+
+#define BEZEL_LEFT      0 * SCALE_WIDTH
+#define BEZEL_TOP       4 * SCALE_HEIGHT
+#define BEZEL_WIDTH     200 * SCALE_WIDTH
+#define BEZEL_HEIGHT    61 * SCALE_HEIGHT
+
+#define DISPLAY_LEFT    0 * SCALE_WIDTH
+#define DISPLAY_TOP     0 * SCALE_HEIGHT
 #define DISPLAY_WIDTH   200 * SCALE_WIDTH
 #define DISPLAY_HEIGHT  61 * SCALE_HEIGHT
 
@@ -69,6 +82,6 @@
 #define MEMORY_SIZE     16
 #define ROM_SIZE        06000
 
-int i_rom [ROM_SIZE];
+extern int i_rom [ROM_SIZE];
 
 void v_init_keypad(obutton *h_button[], oswitch *h_switch[]);
