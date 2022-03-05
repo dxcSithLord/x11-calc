@@ -191,8 +191,15 @@
  * 23 Jan 22         - Removed unwanted debug code - MT
  * 29 Jan 22         - Added an optional bezel to the display, not that you
  *                     will see it yet - MT
+ * 31 Jan 22         - Added support for the HP10C, HP11C, HP12C, HP15C and
+ *                     HP16C - MT
+ * 28 Feb 22         - Read  option implemented to allow ROM contents to be
+ *                     loaded from a file - MT
+ * 04 Mar 22         - Modified  the delay between each tick for the HP10C,
+ *                     HP11C, HP12C, HP15C and HP16C - MT
  *
  * To Do             - Parse command line in a separate routine.
+ *                   - Add verbose option.
  *                   - Allow VMS users to set breakpoints?
  *                   - Load ROMs from a separate file?
  *                   - Free up allocated memory on exit.
@@ -223,6 +230,7 @@
 #include "x11-calc-font.h"
 #include "x11-calc-button.h"
 #include "x11-calc-switch.h"
+#include "x11-calc-label.h"
 #include "x11-calc-colour.h"
 
 #include "x11-calc.h"
@@ -240,11 +248,11 @@
 
 void v_version() /* Display version information */
 {
-   fprintf(stderr, "%s: Version %s %s", FILENAME, VERSION, COMMIT_ID);
-   if (__DATE__[4] == ' ') fprintf(stderr, " 0"); else fprintf(stderr, " %c", __DATE__[4]);
-   fprintf(stderr, "%c %c%c%c %s %s", __DATE__[5],
+   fprintf(stdout, "%s: Version %s %s", FILENAME, VERSION, COMMIT_ID);
+   if (__DATE__[4] == ' ') fprintf(stdout, " 0"); else fprintf(stdout, " %c", __DATE__[4]);
+   fprintf(stdout, "%c %c%c%c %s %s", __DATE__[5],
       __DATE__[0], __DATE__[1], __DATE__[2], __DATE__ +9, __TIME__ );
-   fprintf(stderr, " (Build: %s)\n", BUILD );
+   fprintf(stdout, " (Build: %s)\n", BUILD );
 }
 
 void v_warning(const char *s_format, ...) /* Print formatted warning message and exit */
@@ -263,6 +271,7 @@ void v_error(const char *s_format, ...) /* Print formatted error message and exi
    fprintf(stderr, "%s : ", FILENAME);
    vfprintf(stderr, s_format, t_args);
    va_end(t_args);
+   fprintf(stdout,"\n");
    exit(-1);
 }
 
@@ -285,7 +294,12 @@ int main(int argc, char *argv[])
    XSizeHints *h_size_hint;
    Atom wm_delete;
 
-   oswitch *h_switch[2];
+#if defined(SWITCHES)
+   oswitch *h_switch[SWITCHES];
+#endif
+#if defined(LABELS)
+   olabel *h_label[LABELS];
+#endif
    obutton *h_button[BUTTONS]; /* Array to hold pointers to buttons */
    obutton *h_pressed = NULL;
    odisplay *h_display; /* Pointer to display structure */
@@ -319,6 +333,7 @@ int main(int argc, char *argv[])
    int i_trap = -1; /* Trap instruction */
    int i_ticks = -1;
 
+   h_processor = h_processor_create(i_rom);
 #if defined(vms) /* Parse DEC style command line options */
    for (i_count = 1; i_count < argc; i_count++)
    {
@@ -421,6 +436,22 @@ int main(int argc, char *argv[])
                               argv[i_offset] = argv[i_offset + 1];
                         argc--;
                      }
+                  }
+                  else
+                     v_error(h_err_missing_argument, argv[i_count]);
+               i_index = strlen(argv[i_count]) - 1;
+               break;
+            case 'r': /* Read ROM contents  */
+               if (argv[i_count][i_index + 1] != 0)
+                  v_error(h_err_invalid_argument, argv[i_count][i_index + 1]);
+               else
+                  if (i_count + 1 < argc)
+                  {
+                     v_read_rom(h_processor, argv[i_count + 1]); /* Load user specified settings */
+                     if (i_count + 2 < argc) /* Remove the parameter from the arguments */
+                        for (i_offset = i_count + 1; i_offset < argc - 1; i_offset++)
+                           argv[i_offset] = argv[i_offset + 1];
+                     argc--;
                   }
                   else
                      v_error(h_err_missing_argument, argv[i_count]);
@@ -534,8 +565,13 @@ int main(int argc, char *argv[])
    s_font = LARGE_TEXT; /* Large text font */
    if (!(h_large_font = XLoadQueryFont(x_display, s_font))) v_error(h_err_font, s_font);
 
-   v_init_keypad(h_button, h_switch); /* Create buttons */
-
+   v_init_buttons(h_button); /* Create buttons */
+#if defined(SWITCHES)
+   v_init_switches(h_switch);
+#endif
+#if defined(LABELS)
+   v_init_labels(h_label);
+#endif
    h_display = h_display_create(0, BEZEL_LEFT, BEZEL_TOP, BEZEL_WIDTH, BEZEL_HEIGHT,
       DISPLAY_LEFT, DISPLAY_TOP, DISPLAY_WIDTH, DISPLAY_HEIGHT, DIGIT_COLOUR, DIGIT_BACKGROUND,
       DISPLAY_BACKGROUND, BEZEL_COLOUR); /* Create display */
@@ -554,21 +590,22 @@ int main(int argc, char *argv[])
    XMapWindow(x_display, x_application_window);    /* Show window on display */
    XRaiseWindow(x_display, x_application_window); /* Raise window - ensures expose event is raised? */
 
-   fprintf(stderr, "ROM Size : %4u words \n", (unsigned)(sizeof(i_rom) / sizeof i_rom[0]));
-   h_processor = h_processor_create(i_rom);
+   fprintf(stdout, "ROM Size : %4u words \n", (unsigned)(sizeof(i_rom) / sizeof i_rom[0]));
    h_processor->trace = b_trace;
    h_processor->step = b_step;
 
    if (s_pathname == NULL)
-      v_processor_restore(h_processor);
+      v_restore_state(h_processor);
    else
-      v_processor_load(h_processor, s_pathname); /* Load user specified settings */
+      v_read_state(h_processor, s_pathname); /* Load user specified settings */
 
    b_abort = False;
    i_count = 0;
 
+#if defined(SWITCHES)
    if (h_switch[0] != NULL) h_processor->enabled = h_switch[0]->state; /* Allow switches to be undefined if not used */
    if (h_switch[1] != NULL) h_processor->select = h_switch[1]->state;
+#endif
 
    while (!b_abort) /* Main program event loop */
    {
@@ -578,10 +615,10 @@ int main(int argc, char *argv[])
          i_display_update(x_display, x_application_window, i_screen, h_display, h_processor);
          i_display_draw(x_display, x_application_window, i_screen, h_display); /* Redraw display */
          i_count = INTERVAL;
-#if defined(HP67)
+#if defined(HP67) || defined(HP41)
          i_wait(INTERVAL / 4); /* Sleep for ~6.25 ms per tick */
          if (i_ticks > 0) i_ticks -= 1;
-#elif defined(HP31) || defined(HP32) || defined(HP33) || defined(HP34) || defined(HP37) || defined(HP38)
+#elif defined(HP31) || defined(HP32) || defined(HP33) || defined(HP34) || defined(HP37) || defined(HP38) || defined (HP10) || defined (HP11) || defined (HP12) || defined (HP15) || defined (HP16)
          i_wait(INTERVAL / 3); /* Sleep for ~8.33 ms per tick */
          if (i_ticks > 0) i_ticks -= 2;
 #else
@@ -629,9 +666,9 @@ int main(int argc, char *argv[])
             {
                v_processor_reset(h_processor);
                if (s_pathname == NULL)
-                  v_processor_restore(h_processor); /* Load current saved settings */
+                  v_restore_state(h_processor); /* Load current saved settings */
                else
-                  v_processor_load(h_processor, s_pathname); /* Load user specified settings */
+                  v_read_state(h_processor, s_pathname); /* Load user specified settings */
                b_run = True;
             }
             else { /* Check for matching button */
@@ -645,6 +682,10 @@ int main(int argc, char *argv[])
                      i_button_draw(x_display, x_application_window, i_screen, h_pressed);
                      h_processor->code = h_pressed->index;
                      h_processor->keypressed = True;
+#if !defined(SWITCHES)
+                     h_processor->enabled = True; /* Any key press wil wake up the processor */
+                     h_processor->sleep = False;
+#endif
                      break;
                   }
                }
@@ -677,9 +718,14 @@ int main(int argc, char *argv[])
                      i_button_draw(x_display, x_application_window, i_screen, h_pressed);
                      h_processor->code = h_pressed->index;
                      h_processor->keypressed = True;
+#if !defined(SWITCHES)
+                     h_processor->enabled = True; /* Any key press wil wake up the processor */
+                     h_processor->sleep = False;
+#endif
                      break;
                   }
                }
+#if defined(SWITCHES)
                if (h_pressed == NULL) { /* It wasn't a button that was pressed check the switches */
                   if (!(h_switch_pressed(h_switch[0], x_event.xbutton.x, x_event.xbutton.y) == NULL))
                   {
@@ -688,11 +734,11 @@ int main(int argc, char *argv[])
                      if (h_switch[0]->state)
                      {
                         v_processor_reset(h_processor); /* Reset the processor */
-                        v_processor_restore(h_processor); /* Restore saved settings */
+                        v_restore_state(h_processor); /* Restore saved settings */
                      }
                      else
                      {
-                        v_processor_save(h_processor); /* Save current settings */
+                        v_save_state(h_processor); /* Save current settings */
                         h_processor->enabled = False; /* Disable the processor */
                         i_ticks = DELAY; /* Set count down */
                      }
@@ -704,6 +750,7 @@ int main(int argc, char *argv[])
                      h_processor->select = h_switch[1]->state;
                   }
                }
+#endif
             }
             break;
          case ButtonRelease :
@@ -715,17 +762,25 @@ int main(int argc, char *argv[])
                   i_button_draw(x_display, x_application_window, i_screen, h_pressed);
                   h_processor->keypressed = False; /* Don't clear the status bit here!! */
                }
+#if defined(SWITCHES)
                if (h_pressed == NULL) /* It wasn't a button that was released so check the switches */
                   if (!(h_switch_pressed(h_switch[0], x_event.xbutton.x, x_event.xbutton.y) == NULL))
                      i_ticks = -1;
+#endif
             }
             break;
          case Expose : /* Draw or redraw the window */
-            i_display_draw(x_display, x_application_window, i_screen, h_display);/* Draw display */
-            i_switch_draw(x_display, x_application_window, i_screen, h_switch[0]);
-            i_switch_draw(x_display, x_application_window, i_screen, h_switch[1]);
             {
                int i_count;
+               i_display_draw(x_display, x_application_window, i_screen, h_display);/* Draw display */
+#if defined(LABELS)
+               for (i_count = 0; i_count < LABELS; i_count++) /* Draw labels */
+                  i_label_draw(x_display, x_application_window, i_screen, h_label[i_count]);
+#endif
+#if defined(SWITCHES)
+               for (i_count = 0; i_count < SWITCHES; i_count++) /* Draw switches */
+                  i_switch_draw(x_display, x_application_window, i_screen, h_switch[i_count]);
+#endif
                for (i_count = 0; i_count < BUTTONS; i_count++) /* Draw buttons */
                   i_button_draw(x_display, x_application_window, i_screen, h_button[i_count]);
             }
@@ -737,7 +792,7 @@ int main(int argc, char *argv[])
       }
    }
 
-   v_processor_save(h_processor); /* Save state */
+   v_save_state(h_processor); /* Save state */
 
    /** XFreeCursor (x_display, x_cursor); /* Free cursor */
    XDestroyWindow(x_display, x_application_window); /* Close connection to server */
