@@ -2,10 +2,10 @@ name: C/C++ CI
 
 on:
   push:
-    branches: [ stable ]
+    branches: [ unstable ]
 
   pull_request:
-    branches: [ stable ]
+    branches: [ unstable ]
 
 jobs:
   build:
